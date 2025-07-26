@@ -1,10 +1,11 @@
 import sys
 import os
+
 # 添加模块所在的文件夹到 sys.path
-folder_path = "/mnt/sda/liupei/NCTF_new/src/"
+folder_path = "/src/"
 sys.path.append(folder_path)
 
-from drug_oneil_data import GetData
+from drug_nci_data import GetData
 from MCTD import Model
 from ConvNTC import ConvNTC
 import pandas as pd
@@ -24,9 +25,11 @@ import math
 import time
 import tensorly as tl
 from tqdm import tqdm
+
 # from utils import draw
 
 tl.set_backend('pytorch')
+
 
 def fix_seed(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -40,25 +43,16 @@ def fix_seed(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
     os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
 
-def he_init(m):
-    if isinstance(m, nn.Linear):
-        nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
-        if m.bias is not None:
-            nn.init.zeros_(m.bias)
-
-# def he_init_1(m):
-#     if isinstance(m, (torch.nn.Linear, torch.nn.Conv1d, torch.nn.Conv2d)):
-#         torch.nn.init.kaiming_normal_(m.weight, mode = 'fan_in')
-
 def he_init_1(m):
     if isinstance(m, (torch.nn.Linear, torch.nn.Conv1d, torch.nn.Conv2d)):
-        #torch.nn.init.kaiming_normal_(m.weight, mode = 'fan_in')
-        torch.nn.init.kaiming_normal_(m.weight, a=0, mode = 'fan_in', nonlinearity='relu')
-        #torch.nn.init.kaiming_normal_(m.weight, a=0.01, mode = 'fan_in', nonlinearity='leaky_relu')
+        # torch.nn.init.kaiming_normal_(m.weight, mode = 'fan_in')
+        torch.nn.init.kaiming_normal_(m.weight, a=0, mode='fan_in', nonlinearity='relu')
+        # torch.nn.init.kaiming_normal_(m.weight, a=0.01, mode = 'fan_in', nonlinearity='leaky_relu')
         if m.bias is not None:
             nn.init.zeros_(m.bias)
 
-def train_test(model, criterion, lr, epochs, train_loader, val_loader, idxs_test, labels_test,k,k_folds,device):
+
+def train_test(model, criterion, lr, epochs, train_loader, val_loader, idxs_test, labels_test, k, k_folds, device):
     print(model)
     optimizer = optim.Adam(model.parameters(), lr=lr)
     min_val, min_test, min_epoch, final_model = 9999, 9999, 0, 0
@@ -66,7 +60,7 @@ def train_test(model, criterion, lr, epochs, train_loader, val_loader, idxs_test
     # loss_train_list = []
     # loss_test_list = []
     for epoch in tqdm(range(epochs)):
-    #for epoch in range(epochs):
+        # for epoch in range(epochs):
         ##训练
         model.train()
         train_loss, valid_loss = 0, 0
@@ -75,7 +69,7 @@ def train_test(model, criterion, lr, epochs, train_loader, val_loader, idxs_test
             optimizer.zero_grad()
             inputs_gpu = [tensor.to(device) for tensor in inputs[:-1]]
             outputs = model(inputs_gpu)
-            #print(inputs[-1].unsqueeze(1))
+            # print(inputs[-1].unsqueeze(1))
             loss = criterion(outputs, inputs[-1].unsqueeze(1).to(device))
             loss.backward()
             optimizer.step()
@@ -116,18 +110,18 @@ def train_test(model, criterion, lr, epochs, train_loader, val_loader, idxs_test
         outputs = testModel(inputs_gpu)
         loss = criterion(outputs, labels_test.unsqueeze(1).to(device))
         print(f"Fold {k + 1}/{k_folds}, Test Loss: {loss:.6f}")
-    return outputs,testModel
+    return outputs, testModel
+
 
 class Experiments(object):
 
-    def __init__(self, drug_drug_data, model_name='NCTF', msi=10, times=10,folds=5,a=0.5,negs=1,
+    def __init__(self, drug_drug_data, model_name='NCTF', msi=10, times=10, folds=5, a=0.5, negs=1,
                  lr=0.001, epoch=150, batch_size=2048, nc=57,
                  kernel_size=[(1, 3), (57, 1)], dims=[1],
                  **kwargs):
         super().__init__()
         self.drug_drug_data = drug_drug_data
         self.model = Model(model_name)
-        self.numpyModel = numpyModel(model_name)
         self.msi = msi
         self.times = times
         self.lr = lr
@@ -148,14 +142,15 @@ class Experiments(object):
         metrics_tensor_all = np.zeros((1, 7))
         avgmetrics_tensor_10 = np.zeros((1, 7))
         j = 0
-        kname = ['kernel1', 'kernel2','kernel3']
+        kname = ['kernel1', 'kernel2', 'kernel3']
         dname = ['dims1', 'dims2', 'dima3']
         kernel_sizeList = [[(1, len(self.shape)), (r, 1)], [(r, 1), (1, len(self.shape))]]  # our
-        #kernel_sizeList = [[(1, len(self.shape)), (r, 1)], [(r, 1), (1, len(self.shape))], [(1, 1),(1, len(self.shape)), (r, 1)]]
+        # kernel_sizeList = [[(1, len(self.shape)), (r, 1)], [(r, 1), (1, len(self.shape))], [(1, 1),(1, len(self.shape)), (r, 1)]]
         dimsList = [[1], [self.channel, 1], [self.channel, self.channel, 1]]  # pre层
-        s1=kname[kernel_sizeList.index(self.kernel_size)]
-        s2=dname[dimsList.index(self.dims)]
-        df = pd.DataFrame(columns=['j', 'methods', 'times', 'folds', 'kernel', 'dims', 'aupr', 'auc', 'f1_score', 'accuracy',
+        s1 = kname[kernel_sizeList.index(self.kernel_size)]
+        s2 = dname[dimsList.index(self.dims)]
+        df = pd.DataFrame(
+            columns=['j', 'methods', 'times', 'folds', 'kernel', 'dims', 'aupr', 'auc', 'f1_score', 'accuracy',
                      'recall', 'specificity',
                      'precision'])
         for i in range(self.times):
@@ -223,18 +218,8 @@ class Experiments(object):
                 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
                 del train_dataset, val_dataset
 
-                msi = [1, 2,
-                       3,4,5,
-                       6,
-                       7,8,9,10,
-                       11,12,
-                          13,14,15,16,17,18]
-                mnameList = ['NCTF_ConvKAN_16','NCTF_ConvMLP_16',
-                             'NCTF_ConvKAN_16_noeca1','NCTF_ConvKAN_16_noeca2','NCTF_ConvKAN_16_noeca12',
-                             'NCTF_ConvKAN_17',
-                             'NCTF_ConvMLP_16_noeca12','NCTF_ConvKAN_13','NCTF_ConvKAN_1','ConvKAN',
-                             'NCTF_ConvMLP_16_noeca2','NCTF_ConvKAN_CBAM',
-                            'NCTF_ConvKAN_18','NCTF_ConvKAN_19','NCTF_ConvKAN_20','NCTF_ConvMLP_18','NCTF_KAN_18','NCTF_MLP_18']
+                msi = [13]
+                mnameList = ['ConvNTC']
                 mname = mnameList[msi.index(self.msi)]
                 print(mname)
 
@@ -255,28 +240,28 @@ class Experiments(object):
                 #                           )
                 # print('NCTF')
 
-                ### 直接导入提前学习好的因子矩阵 
-                fname='NCTF_embeds/factors_'+str(i)+'_times_'+str(k)+'_fold.pkl'
+                ### 直接导入提前学习好的因子矩阵
+                fname = 'NCTF_embeds/factors_' + str(i) + '_times_' + str(k) + '_fold.pkl'
                 print(fname)
                 with open(fname, 'rb') as f:  # Python 3: open(..., 'rb')
                     M, C, D = pickle.load(f)
                 M = M.to(device)
                 C = C.to(device)
                 D = D.to(device)
-                
+
                 print(M.shape, C.shape, D.shape)
-                
+
                 ### 构建深度非线性模型 ### 定义损失函数 和 优化器
                 if self.msi == 13:
                     Neural_Model = ConvNTC(shape, rank, nc, M, C, D, device, kernel_size,
-                                                   dims=dims, act_func=nn.SiLU, dropout=0.0, input_dropout=0.0,alpha = self.a).to(device)
+                                                   dims=dims, act_func=nn.SiLU, dropout=0.0, input_dropout=0.0,
+                                                   alpha=self.a).to(device)
 
-                # print(Neural_Model)
-                #criterion = nn.MSELoss()
                 Neural_Model.apply(he_init_1)
                 criterion = nn.BCEWithLogitsLoss()
                 # optimizer = optim.Adam(Neural_Model.parameters(), lr=lr)
-                outputs,testModel = train_test(Neural_Model, criterion, lr, epochs, train_loader, val_loader, idxs_test, labels_test, k, k_folds, device)
+                outputs, testModel = train_test(Neural_Model, criterion, lr, epochs, train_loader, val_loader,
+                                                idxs_test, labels_test, k, k_folds, device)
 
                 ### 存储每折每次的预测和真实值
                 # fname='newscore/'+mname+'_'+str(i)+'_times_'+str(k)+'_foldscores_mse.pkl'
@@ -285,10 +270,10 @@ class Experiments(object):
                 #     pickle.dump([labels_test.cpu().numpy(),outputs.T[0].cpu().numpy()], f)
 
                 ## 存储每折每次的预测和真实值
-                # fname='pred_score_pkl/'+mname+'_'+str(i)+'_times_'+str(k)+'_foldscores.pkl'
-                # print(fname)
-                # with open(fname, 'wb') as f:  # Python 3: open(..., 'wb')
-                #     pickle.dump([testModel,idxs_test,labels_test.cpu().numpy(),outputs.T[0].cpu().numpy()], f)
+                fname = 'pred_score_pkl/' + mname + '_' + str(i) + '_times_' + str(k) + '_foldscores.pkl'
+                print(fname)
+                with open(fname, 'wb') as f:  # Python 3: open(..., 'wb')
+                    pickle.dump([testModel, idxs_test, labels_test.cpu().numpy(), outputs.T[0].cpu().numpy()], f)
 
                 # print(idxs_test.T)
                 # print(idxs_test.T[0],len(idxs_test.T[0]))
@@ -302,9 +287,9 @@ class Experiments(object):
                     'pred_score': outputs.T[0].cpu().numpy()  # 假设 preds 是一个二维数组，取第二列作为预测概率
                 })
                 # 保存为 CSV 文件
-                fname='pred_score_csv/'+mname+'_'+str(i)+'_times_'+str(k)+'_foldscores.csv'
+                fname = 'pred_score_csv/' + mname + '_' + str(i) + '_times_' + str(k) + '_foldscores.csv'
                 results.to_csv(fname, index=False)
-                
+
                 ### 计算评价指标
                 metrics = self.get_metrics_1(labels_test.cpu().numpy(), outputs.T[0].cpu().numpy())
                 # print(metrics)
@@ -312,19 +297,21 @@ class Experiments(object):
                 metrics_tensor_all = metrics_tensor_all + metrics
                 # print(metrics)
                 aupr, auc_value, f1_score, accuracy, recall, specificity, precision = metrics
-                df.loc[j] = [j, mname, i, k, kernel_size, dims, aupr, auc_value, f1_score, accuracy, recall, specificity, precision]
+                df.loc[j] = [j, mname, i, k, kernel_size, dims, aupr, auc_value, f1_score, accuracy, recall,
+                             specificity, precision]
                 j = j + 1
 
             result = np.around(metrics_tensor / k_folds, decimals=4)
             print('Times:\t', i + 1, ':\t', result)
             avgmetrics_tensor_10 = avgmetrics_tensor_10 + result
 
-        #print(self.a,str(self.a))
+        # print(self.a,str(self.a))
         sname = s1 + '_' + s2 + '_' + str(self.a)
         # fname = os.path.join('newablation/new3', mname + '_' + sname + '_hmddv32_5times5CV_1neg_results_bceheinit.csv')
         # print(fname)
         # df.to_csv(fname, index=False)  # index=False 表示不写入行索引
-        fname = os.path.join('compareTF', mname + '_' + sname + '_ddi_'+str(self.negs)+'neg_results_bceheinit_fixed_new.csv')
+        fname = os.path.join('compareTF',
+                             mname + '_' + sname + '_ddi_' + str(self.negs) + 'neg_results_bceheinit_fixed_new.csv')
         df.to_csv(fname, index=False)  # index=False 表示不写入行索引
         # print(j)
         # print(df)
@@ -334,7 +321,6 @@ class Experiments(object):
         # results_2 = np.around(avgmetrics_tensor_10 / self.times, decimals=4)
         # print('final:\t', results_2)
         return results_1
-
 
     def get_metrics_1(self, real_score, predict_score):
         real_score = np.mat(real_score)
@@ -405,7 +391,6 @@ class Experiments(object):
 
         return aupr[0, 0], auc[0, 0], f1_score, accuracy, recall, specificity, precision
 
-
 if __name__ == '__main__':
     fix_seed(2024)
     ### 导入数据
@@ -413,10 +398,11 @@ if __name__ == '__main__':
     ###循环次数
     times = 5
     ### 导入数据
+    # folder = '/mnt/sda/liupei/NCTF/newCode/data/newmmd_10times_5cv'
     signal = 13
-    miRNA_num = 38
-    disease_num = 39
-    folder = '/mnt/sda/liupei/NCTF_new/data/oneil_ddi5cv'
+    miRNA_num = 87
+    disease_num = 55
+    folder = '/mnt/sda/liupei/NCTF_new/data/NCI_ddi5cv'
     drug_drug_data = GetData(miRNA_num=miRNA_num, disease_num=disease_num, filefolder=folder, signal=signal)
     ## 设置参数
     # lr = 0.0001  ## 设置均不同
@@ -426,48 +412,54 @@ if __name__ == '__main__':
     ### 搜索最优配置
     msiList = [13]
     mnameList = ['ConvNTC']
-    df = pd.DataFrame(columns=['methods', 'a','nc','lr','batch_size','epoch','times', 'kernel', 'dim', 'aupr', 'auc', 'f1_score', 'accuracy', 'recall', 'specificity','precision'])
+    df = pd.DataFrame(
+        columns=['methods', 'a', 'nc', 'lr', 'batch_size', 'epoch', 'times', 'kernel', 'dim', 'aupr', 'auc', 'f1_score',
+                 'accuracy', 'recall', 'specificity', 'precision'])
     i = 0
     folds = 5
-    mu,eta,alpha,beta,lam=0.5,2,0.125,0.125,0.001
-    r = 122
-    lrList = [0.001, 0.0001,0.00001]#3
-    #epochList = [100, 300, 500]
-    batch_sizeList = [256, 512, 1024]#4
-    ncList = [int(0.5*r), r, int(2*r)]  # 3
-    #nc = int(2*r)
+    mu, eta, alpha, beta, lam = 0.5, 2, 0.125, 0.125, 0.001
+    r = 57
+    lrList = [0.001, 0.0001, 0.00001]  # 3
+    # epochList = [100, 300, 500]
+    batch_sizeList = [256, 512, 1024]  # 4
+    ncList = [int(0.5 * r), r, int(2 * r)]  # 3
+    # nc = int(2*r)
     kernel_sizeList = [[(1, len(shape)), (r, 1)], [(r, 1), (1, len(shape))]]  # our
-    #dimsList = [[1], [nc, 1], [nc, nc, 1]]  # pre层
-    #alist = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
+    # dimsList = [[1], [nc, 1], [nc, nc, 1]]  # pre层
+    # alist = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]
     for msi in [13]:
         mname = mnameList[msiList.index(msi)]
         print(mname)
-        dims = [1]# one-layer
+        dims = [1]  # one-layer
         kernel_size = kernel_sizeList[0]
         if msi in [13]:
             alist = [0.8]
         else:
             alist = [0.8]
-        for lr in [0.00001]:#3 0.00001
-            #for nc in ncList:
-            for batch_size in [256]:#4 512
-                for nc in [int(2*r)]:#3 2r
-                    for a in alist:#11
+        for lr in [0.00001]:  # 3 0.00001
+            # for nc in ncList:
+            for batch_size in [512]:  # 4 512
+                for nc in [int(2 * r)]:  # 3 2r
+                    for a in alist:  # 11
                         since1 = time.time()
-                        experiment = Experiments(drug_drug_data, model_name='MCTD', msi=msi, times=times, folds=folds,a=a,
+                        experiment = Experiments(drug_drug_data, model_name='MCTD', msi=msi,
+                                                 times=times, folds=folds, a=a,
                                                  lr=lr, epoch=epoch, batch_size=batch_size, nc=nc,
                                                  kernel_size=kernel_size, dims=dims,
-                                                 r=r, mu=mu, eta=eta, alpha=alpha, beta=beta,lam=lam, tol = 1e-4, max_iter = 100)
-                
+                                                 r=r, mu=mu, eta=eta, alpha=alpha, beta=beta, lam=lam, tol=1e-4,
+                                                 max_iter=100)
+
                         aupr, auc, f1_score, accuracy, recall, specificity, precision = experiment.CV_triplet()[0]
-                        df.loc[i] = [mname, a, nc,lr,batch_size,epoch,times, kernel_size, dims, aupr, auc, f1_score, accuracy, recall, specificity,
+                        df.loc[i] = [mname, a, nc, lr, batch_size, epoch, times, kernel_size, dims, aupr, auc, f1_score,
+                                     accuracy, recall, specificity,
                                      precision]
                         print(f"\ttimes={times}\tmethods={mname}\tmsi={msi}\tkernel={kernel_size}\tdim={dims}\ta={a}")
-                        print(f"auc={auc}\taupr={aupr}\tf1={f1_score}\tacc={accuracy}\trecall={recall}\tspe={specificity}\tpre={precision}\n")
+                        print(
+                            f"auc={auc}\taupr={aupr}\tf1={f1_score}\tacc={accuracy}\trecall={recall}\tspe={specificity}\tpre={precision}\n")
                         i = i + 1
                         time_elapsed1 = time.time() - since1
                         print(time_elapsed1 // 60, time_elapsed1 % 60)
 
-    df.to_csv('ConvNTC_negResults_oneil.csv',index=False)
+    df.to_csv('ConvNTC_negResults_nci.csv', index=False)
     time_elapsed = time.time() - since
     print(time_elapsed // 60, time_elapsed % 60)

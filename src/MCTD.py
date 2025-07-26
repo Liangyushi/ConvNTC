@@ -40,6 +40,7 @@ class Model(object):
         self.name = name
         self.device =device
 
+
     def MCTD(self, X, S_m, S_d, r=4, mu=0.125, alpha=0.1, eta=0.25, beta=0.1, lam=0.001, tol=1e-4, max_iter=500):
         # Conjugate Gradient method (CG) using PyTorch
         def CG(X_initial, A, B, D, mu, tol, max_iter):

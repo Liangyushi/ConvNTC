@@ -247,9 +247,7 @@ if __name__ == '__main__':
     df = pd.DataFrame(columns=['neg', 'aupr', 'auc', 'f1_score', 'accuracy', 'recall', 'specificity', 'precision'])
     j = 0
     r = 122
-    # mu,eta,alpha,beta,lam=0.5,2,0.125,0.125,0.001
     mu, eta, alpha, beta, lam = 0.5, 2, 0.125, 0.125, 0.001
-    # for neg in [1,2,4,6,8,10]:
     for neg in [1]:
         signal = 13
         miRNA_num = 38
@@ -266,8 +264,6 @@ if __name__ == '__main__':
             f"auc={auc_value}\taupr={aupr}\tf1={f1_score}\tacc={accuracy}\trecall={recall}\tspe={specificity}\tpre={precision}\n")
         j = j + 1
 
-    # experiment = Experiments(drug_drug_data, model_name='NCTF_torch_splitSim_1', r=30, mu=0.5, alpha=0.5, eta=0.2, beta=0.5, lam=0.001, tol=1e-6, max_iter=200)
-    # experiment = Experiments(drug_drug_data, model_name='NCTF_torch_splitSim_2', r=30, mu=0.5, alpha=0.5, eta=0.2, beta=0.5, lam=0.001, tol=1e-6, max_iter=200)
     df.to_csv('MCTD_1negResults.csv', index=False)  # index=False 表示不写入行索引
     time_elapsed = time.time() - since
     print(time_elapsed // 60, time_elapsed % 60)

@@ -97,10 +97,6 @@ class GetData(object):
         return f, x, s, all_posIndex, all_poscv, all_negIndex, all_negcv,all_posSynergy,all_negSynergy,all_posTriInd,all_negTriInd
 
     def __get_drugWithSynergy_data__(self):
-
-        # tname5 = ["Simdrug_cosine","Simdrug_jaccardAndCosine"]
-        # tname6 = ["Simcell_cosine", "Simcell_spearman"]
-
         tname5 = ["newdrugsim_nci"]
         tname6 = ["Simcell_cosine"]
         if self.signal == 13:  # drug data 第1，3维有约束，第2维和第1维对策的张量方法

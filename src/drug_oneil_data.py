@@ -97,10 +97,6 @@ class GetData(object):
         return f, x, s, all_posIndex, all_poscv, all_negIndex, all_negcv,all_posSynergy,all_negSynergy,all_posTriInd,all_negTriInd
 
     def __get_drugWithSynergy_data__(self):
-
-        # tname5 = ["Simdrug_cosine","Simdrug_jaccardAndCosine"]
-        # tname6 = ["Simcell_cosine", "Simcell_spearman"]
-
         tname5 = ["Simdrug_cosine"]
         tname6 = ["Simcell_cosine"]
 
