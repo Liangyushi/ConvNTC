@@ -14,7 +14,5 @@ NumPy version: 1.26.4
 
 CUDA version: 11.7, NVIDIA GeForce RTX 4090
 
-cuDNN version: 8500
-
 
 
