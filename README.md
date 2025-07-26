@@ -4,7 +4,7 @@ The source code of paper 'ConvNTC: Convolutional neural tensor completion for de
 # The source code will be made public when the paper is accepted
 
 # Runing Environment
-Python version: 3.10.13 (main, Sep 11 2023, 13:44:35) [GCC 11.2.0]
+Python version: 3.10.13
 
 PyTorch version: 2.0.1
 
