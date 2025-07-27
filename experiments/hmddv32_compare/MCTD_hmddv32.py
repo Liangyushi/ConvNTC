@@ -2,7 +2,7 @@ import sys
 import os
 
 # 添加模块所在的文件夹到 sys.path
-folder_path = "/mnt/sda/liupei/NCTF_new/src/"
+folder_path = "E:/hnu_paper/3_ConvNTC/github/ConvNTC/src/"
 sys.path.append(folder_path)
 
 # 导入模块
@@ -232,7 +232,7 @@ if __name__ == '__main__':
     # mu,eta,alpha,beta,lam=0.5,0.75,0.5,0.125,0.001
     # for neg in [1,2,4,6,8,10]:
     for neg in [1]:
-        folder = 'data/hmddv32_neg/' + str(neg) + 'n'
+        folder = 'E:/hnu_paper/3_ConvNTC/github/ConvNTC/data/hmddv32_neg/' + str(neg) + 'n'
         drug_drug_data = GetData(miRNA_num=351, disease_num=325, filefolder=folder, signal=11, neg=neg)
         experiment = Experiments(drug_drug_data, model_name='MCTD', times=times, folds=folds,
                                  negs=neg,r=r, mu=mu, alpha=alpha, eta=eta, beta=beta, lam=lam, tol=1e-4, max_iter=100)
