@@ -19,18 +19,17 @@ CUDA version: 11.7, NVIDIA GeForce RTX 4090
 ---
 
 ## 📁 Project Structure
-
+This repository contains code and datasets for evaluating miRNA–miRNA–disease (MMD) and drug–drug–cell (DDC) triplet prediction using convolutional neural tensor completion (ConvNTC) and multi-constraint tensor decomposition (MCTD). The experiments are conducted on multiple datasets including **NCI**, **Oneil**, and **HMDD V3.2**.
 ```
 ├── data/
-│   ├── NCI_ddi5cv/                 # NCI dataset with 5-fold cross-validation
+│   ├── NCI_ddi5cv/                 # NCI dataset with 5-fold cross-validation (DDC dataset)
 │   │   ├── information/            # Metadata and supporting files
 │   │   ├── Simcell_cosine.csv      # Cell similarity matrix
 │   │   ├── newdrugsim_nci.csv      # Drug similarity matrix
-│   │   ├── neg_mmd_*.txt           # Negative samples (MMD)
-│   │   ├── pos_mmd_*.txt           # Positive samples (MMD)
-│   │....
-│   ├── hmdvd32_neg/                # Negative samples for hmdvd32
-│   ├── oneil_ddi5cv/               # Oneil dataset 5-fold
+│   │   ├── neg_mmd_*.txt           # Negative samples
+│   │   ├── pos_mmd_*.txt           # Positive samples
+│   ├── hmdvd32_neg/                # HMDD v3.2 (MMD dataset)
+│   ├── oneil_ddi5cv/               # O'neil dataset (DDC dataset)
 │
 ├── experiments/
 │   ├── NCI_compare/
@@ -44,33 +43,15 @@ CUDA version: 11.7, NVIDIA GeForce RTX 4090
 │       └── MCTD_hmdvd32.py
 │
 ├── src/
-│   ├── ConvKAN/                    # Main model implementations
-│   │   ├── ConvNTC.py              # Convolutional neural tensor model
-│   │   └── MCTD.py                 # Multi-channel tensor decomposition model
+│   ├── ConvKAN/                   # FastKAN model implementations
+│   ├── ConvNTC.py                 # Main model implementations--convolutional neural tensor completion
+│   ├── MCTD.py                    # Multi-constraint tensor decomposition model
 │   ├── compareLinearModels.py     # Comparison with linear models
 │   ├── compareNonlinearModels.py  # Comparison with nonlinear models
 │   ├── drug_nci_data.py           # Data loader for NCI
 │   ├── drug_oneil_data.py         # Data loader for Oneil
-│   └── hmdvd32_data.py            # Data loader for hmdvd32
+│   └── hmdvd32_data.py            # Data loader for hmdd v3.2
 ```
-
----
-
-## 🚀 Getting Started
-
-1. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **Run an experiment**
-   ```bash
-   python experiments/NCI_compare/ConvNTC_nci.py
-   ```
-
-3. **Model options**
-   - ConvNTC: Convolutional Neural Tensor Completion
-   - MCTD: Multi-channel Tensor Decomposition
 
 ---
 
@@ -83,8 +64,8 @@ All datasets are organized for 5-fold cross-validation, with matched positive/ne
 - **information/**
   - `allDrugsmile_nci.csv`: SMILES strings for drugs in NCI dataset.
   - `nci_new.rda`, `nci_smile.ipynb`, `nci_split.R`: R script and notebooks for data preprocessing and splitting.
-  - `Simcell_cosine.csv`: Cosine similarity between cell lines.
-  - `newdrugsim_nci.csv`: Drug–drug similarity matrix.
+  - `Simcell_cosine.csv`: Cosine similarity between cell lines based on gene expression.
+  - `newdrugsim_nci.csv`: Drug–drug similarity matrix based on SMILES strings.
 
 - **Main Files:**
   - `pos_mmd_1neg_*.txt`: Positive drug-cell interaction samples.
@@ -107,13 +88,25 @@ All datasets are organized for 5-fold cross-validation, with matched positive/ne
 ### 📦 `data/oneil_ddi5cv/`
 
 - **information/**
-  - `Simcell_cosine.csv`, `Simdrug_cosine.csv`: Cosine similarities between cell lines and drugs.
+  - `Deepsynergy_ddi_oneil_new.rda`: DeepSynergy-based DDI O'neil dataset.
+  - `oneil_split.R`: R script for O'neil data preprocessing and splitting.
 
 - **Main Files:**
-  - `cell_feature.csv`, `drug_feature.csv`: Feature matrices for each entity.
-  - `newdrugsim.csv`: Drug similarity matrix.
+  - `Simcell_cosine.csv`, `Simdrug_cosine.csv`: Cosine similarities of cell lines and drugs based on `cell_feature.csv`, `drug_feature.csv.
+  - `cell_feature.csv`, `drug_feature.csv`: Feature matrices for cell lines and drugs.
+  - `newdrugsim.csv`: Drug similarity matrix based on SMILES strings.
   - `pos_mmd_1neg_*.txt`, `neg_mmd_1neg_*.txt`: 5-fold split positive and negative samples.
 
+#### 🧪 Novel DDC Case Study (`information/case_novelDDC/`):
+A dedicated evaluation setup to assess generalization to **unseen drug combinations**:
+
+- `75allDrugsmile.csv`: SMILES strings of 75 drugs (novel+known drugs).
+- `novelDrugpair.xlsx`, `novelddi.csv`: Drug pair combinations assumed to be novel.
+- `newdrugsim.csv`: Drug–drug similarity matrix based on SMILES strings for 75 drugs.
+- `smileSim.ipynb`: Jupyter notebook for SMILES-based similarity analysis.
+- `oneil_novel.R`: R script for processing novel DDI evaluation.
+
+> This case study enables testing model generalization to new DDI interactions.
 ---
 
 Each dataset is structured to support consistent cross-validation and evaluation with the same format.
@@ -142,19 +135,34 @@ Each script loads data, trains the model, and evaluates performance metrics like
 
 ## 🧠 Source Code Overview (`src/`)
 
-- **ConvKAN/**
-  - `ConvNTC.py`: Implementation of the Convolutional Neural Tensor Completion model.
-  - `MCTD.py`: Implementation of Multi-Channel Tensor Decomposition model.
+- **ConvKAN/**: FastKAN model implementations
 
-- **compareLinearModels.py**: Baseline comparison using traditional linear models (e.g., Ridge, Logistic Regression).
+- **ConvNTC.py**: Implementation of the Convolutional Neural Tensor Completion model.
 
-- **compareNonlinearModels.py**: Baseline comparison using non-linear models (e.g., Random Forest, MLP).
+- **MCTD.py**: Implementation of Multi-constraint Tensor Decomposition model.
+
+- **compareLinearModels.py**: Baseline comparison using linear models (e.g., CANDECOMP/PARAFAC (CP), TFAI, TDRC, CTF, etc.).
+
+- **compareNonlinearModels.py**: Baseline comparison using non-linear models (e.g., DeepSynergy, Costco, DTF, GraphTF, CTF-DDI, etc.).
 
 - **drug_nci_data.py**: Data loading utilities for the NCI dataset.
 - **drug_oneil_data.py**: Data loading utilities for the Oneil dataset.
 - **hmdvd32_data.py**: Data loading utilities for the hmdvd32 dataset.
 
 - **utils.py**: Common utility functions used across training and evaluation.
+
+---
+
+## 🚀 Getting Started
+
+1. **Run an experiment**
+   ```bash
+   python experiments/NCI_compare/ConvNTC_nci.py
+   ```
+
+2. **Model options**
+   - ConvNTC: Convolutional Neural Tensor Completion
+   - MCTD: Multi-Constraint Tensor Decomposition
 
 ---
 
