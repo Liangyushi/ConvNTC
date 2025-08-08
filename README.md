@@ -107,7 +107,6 @@ A dedicated evaluation setup to assess generalization to **unseen drug combinati
 - `oneil_novel.R`: R script for processing novel DDI evaluation.
 
 > This case study enables testing model generalization to new DDI interactions.
----
 
 Each dataset is structured to support consistent cross-validation and evaluation with the same format.
 
