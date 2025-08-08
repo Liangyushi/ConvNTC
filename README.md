@@ -3,6 +3,8 @@ ConvNTC consists of three parts: the dataset module, the multilinear relationshi
 
 <img width="3442" height="2546" alt="framework_1018" src="https://github.com/user-attachments/assets/3634836f-2a23-4aad-b26f-72b2baf36c27" />
 
+---
+
 # Runing Environment
 Python version: 3.10.13
 
@@ -14,6 +16,8 @@ NumPy version: 1.26.4
 
 CUDA version: 11.7, NVIDIA GeForce RTX 4090
 
+---
+
 ## 📁 Project Structure
 
 ```
@@ -24,7 +28,7 @@ CUDA version: 11.7, NVIDIA GeForce RTX 4090
 │   │   ├── newdrugsim_nci.csv      # Drug similarity matrix
 │   │   ├── neg_mmd_*.txt           # Negative samples (MMD)
 │   │   ├── pos_mmd_*.txt           # Positive samples (MMD)
-│   │
+│   │....
 │   ├── hmdvd32_neg/                # Negative samples for hmdvd32
 │   ├── oneil_ddi5cv/               # Oneil dataset 5-fold
 │
@@ -70,15 +74,49 @@ CUDA version: 11.7, NVIDIA GeForce RTX 4090
 
 ---
 
-## 📊 Datasets
+## 📁 Data Description
 
-Each dataset contains:
-- `Simcell_cosine.csv`: Similarity between cell lines.
-- `newdrugsim_nci.csv`: Drug–drug similarity matrix.
-- `pos_mmd_*`: Positive interaction samples.
-- `neg_mmd_*`: Negative interaction samples.
+All datasets are organized for 5-fold cross-validation, with matched positive/negative interaction pairs and similarity matrices. Below is a detailed breakdown:
 
-> Files are pre-split for 5-fold cross-validation.
+### 📦 `data/NCI_ddi5cv/`
+
+- **information/**
+  - `allDrugsmile_nci.csv`: SMILES strings for drugs in NCI dataset.
+  - `nci_new.rda`, `nci_smile.ipynb`, `nci_split.R`: R script and notebooks for data preprocessing and splitting.
+  - `Simcell_cosine.csv`: Cosine similarity between cell lines.
+  - `newdrugsim_nci.csv`: Drug–drug similarity matrix.
+
+- **Main Files:**
+  - `pos_mmd_1neg_*.txt`: Positive drug-cell interaction samples.
+  - `neg_mmd_1neg_*.txt`: Negative samples for corresponding folds.
+
+---
+
+### 📦 `data/hmdvd32_neg/`
+
+- **Subfolders (`1n`, `2n`, ..., `10n`)**: Contain synthetic negative samples with different ratios.
+  - `dsSim.csv`, `dtSim.csv`, `meshSim.csv`, `msSim.csv`, `mtSim.csv`, `seqSim.csv`: Various similarity measures (disease, drug, sequence, etc.)
+  - `pos_mmd_1neg_*.txt`, `neg_mmd_1neg_*.txt`: Positive and negative interaction files for 5 folds.
+
+- **information/**
+  - `disease.txt`, `miRNA.txt`: Node lists.
+  - `pos_dm.txt`, `pos_mm.txt`, `pos_mmd.txt`: Different edge types for miRNA–disease, miRNA–miRNA, and miRNA–miRNA–disease graphs.
+
+---
+
+### 📦 `data/oneil_ddi5cv/`
+
+- **information/**
+  - `Simcell_cosine.csv`, `Simdrug_cosine.csv`: Cosine similarities between cell lines and drugs.
+
+- **Main Files:**
+  - `cell_feature.csv`, `drug_feature.csv`: Feature matrices for each entity.
+  - `newdrugsim.csv`: Drug similarity matrix.
+  - `pos_mmd_1neg_*.txt`, `neg_mmd_1neg_*.txt`: 5-fold split positive and negative samples.
+
+---
+
+Each dataset is structured to support consistent cross-validation and evaluation with the same format.
 
 ---
 
