@@ -88,7 +88,7 @@ All datasets are organized for 5-fold cross-validation, with matched positive/ne
 ### 📦 `data/oneil_ddi5cv/`
 
 - **information/**
-  - `Deepsynergy_ddi_oneil_new.rda`: DeepSynergy-based DDI O'neil dataset.
+  - `Deepsynergy_ddi_oneil_new.rda`: DeepSynergy-based DDC O'neil dataset.
   - `oneil_split.R`: R script for O'neil data preprocessing and splitting.
 
 - **Main Files:**
@@ -104,9 +104,9 @@ A dedicated evaluation setup to assess generalization to **unseen drug combinati
 - `novelDrugpair.xlsx`, `novelddi.csv`: Drug pair combinations assumed to be novel.
 - `newdrugsim.csv`: Drug–drug similarity matrix based on SMILES strings for 75 drugs.
 - `smileSim.ipynb`: Jupyter notebook for SMILES-based similarity analysis.
-- `oneil_novel.R`: R script for processing novel DDI evaluation.
+- `oneil_novel.R`: R script for processing novel DDC evaluation.
 
-> This case study enables testing model generalization to new DDI interactions.
+> This case study enables testing model generalization to new DDC triplets.
 
 Each dataset is structured to support consistent cross-validation and evaluation with the same format.
 
