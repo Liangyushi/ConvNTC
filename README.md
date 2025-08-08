@@ -88,12 +88,12 @@ All datasets are organized for 5-fold cross-validation, with matched positive/ne
 ### 📦 `data/oneil_ddi5cv/`
 
 - **information/**
-  - `Deepsynergy_ddi_oneil_new.rda`: DeepSynergy-based DDC O'neil dataset.
+  - `Deepsynergy_oneil_new.rda`: DeepSynergy-based DDC O'neil dataset.
+  - `cell_feature.csv`, `drug_feature.csv`: Feature matrices for cell lines and drugs.
   - `oneil_split.R`: R script for O'neil data preprocessing and splitting.
 
 - **Main Files:**
   - `Simcell_cosine.csv`, `Simdrug_cosine.csv`: Cosine similarities of cell lines and drugs based on `cell_feature.csv`, `drug_feature.csv.
-  - `cell_feature.csv`, `drug_feature.csv`: Feature matrices for cell lines and drugs.
   - `newdrugsim.csv`: Drug similarity matrix based on SMILES strings.
   - `pos_mmd_1neg_*.txt`, `neg_mmd_1neg_*.txt`: 5-fold split positive and negative samples.
 
